@@ -18,7 +18,6 @@ import qualified System.Environment as E
 import qualified Prelude as P
 import qualified Numeric as N
 
-
 -- $setup
 -- >>> import Test.QuickCheck
 -- >>> import Course.Core(even, id, const)
@@ -72,8 +71,8 @@ headOr ::
   a
   -> List a
   -> a
-headOr =
-  error "todo"
+headOr x Nil = x
+headOr _ (h :. _) = h
 
 -- | The product of the elements of a list.
 --
@@ -86,7 +85,7 @@ product ::
   List Int
   -> Int
 product =
-  error "todo"
+  foldLeft (*) 1
 
 -- | Sum the elements of the list.
 --
@@ -101,7 +100,7 @@ sum ::
   List Int
   -> Int
 sum =
-  error "todo"
+  foldLeft (+) 0
 
 -- | Return the length of the list.
 --
@@ -112,8 +111,8 @@ sum =
 length ::
   List a
   -> Int
-length =
-  error "todo"
+length Nil = 0
+length (_ :. t) = 1 + length t
 
 -- | Map the given function on each element of the list.
 --
@@ -127,8 +126,7 @@ map ::
   (a -> b)
   -> List a
   -> List b
-map =
-  error "todo"
+map f = foldRight (\h a -> f h :. a) Nil
 
 -- | Return elements satisfying the given predicate.
 --
@@ -144,8 +142,7 @@ filter ::
   (a -> Bool)
   -> List a
   -> List a
-filter =
-  error "todo"
+filter f = foldRight (\h a -> if f h then h :. a else a) Nil
 
 -- | Append two lists to a new list.
 --
@@ -163,8 +160,7 @@ filter =
   List a
   -> List a
   -> List a
-(++) =
-  error "todo"
+(++) a b = foldRight (\t l -> t :. l) b a
 
 infixr 5 ++
 
@@ -181,8 +177,7 @@ infixr 5 ++
 flatten ::
   List (List a)
   -> List a
-flatten =
-  error "todo"
+flatten l = foldRight (\a b -> a ++ b) Nil l
 
 -- | Map a function then flatten to a list.
 --
@@ -198,8 +193,7 @@ flatMap ::
   (a -> List b)
   -> List a
   -> List b
-flatMap =
-  error "todo"
+flatMap f l = flatten $ map f l
 
 -- | Flatten a list of lists to a list (again).
 -- HOWEVER, this time use the /flatMap/ function that you just wrote.
@@ -208,8 +202,7 @@ flatMap =
 flattenAgain ::
   List (List a)
   -> List a
-flattenAgain =
-  error "todo"
+flattenAgain =flatMap (\l -> l)
 
 -- | Convert a list of optional values to an optional list of values.
 --
@@ -233,11 +226,13 @@ flattenAgain =
 --
 -- >>> seqOptional (Empty :. map Full infinity)
 -- Empty
-seqOptional ::
+seqOptional :: Eq a =>
   List (Optional a)
   -> Optional (List a)
-seqOptional =
-  error "todo"
+seqOptional l
+  | any (\i -> i == Empty) l = Empty
+  | otherwise = Full $ map fromFull l
+  where fromFull (Full a) = a
 
 -- | Find the first element in the list matching the predicate.
 --
@@ -259,8 +254,10 @@ find ::
   (a -> Bool)
   -> List a
   -> Optional a
-find =
-  error "todo"
+find f = let listToOpt Nil = Empty
+             listToOpt (a :. _) = Full a
+           in listToOpt . filter f
+
 
 -- | Determine if the length of the given list is greater than 4.
 --
@@ -278,8 +275,12 @@ find =
 lengthGT4 ::
   List a
   -> Bool
-lengthGT4 =
-  error "todo"
+lengthGT4 Nil = False
+lengthGT4 (_ :. Nil) = False
+lengthGT4 (_ :. _ :. Nil) = False
+lengthGT4 (_ :. _ :. _ :. Nil) = False
+lengthGT4 (_ :. _ :. _ :. _ :. Nil) = False  -- TODO
+lengthGT4 (_ :. _ :. _ :. _ :. _) = True
 
 -- | Reverse a list.
 --
@@ -294,9 +295,8 @@ lengthGT4 =
 -- prop> let types = x :: Int in reverse (x :. Nil) == x :. Nil
 reverse ::
   List a
-  -> List a
-reverse =
-  error "todo"
+  -> List a  -- TODO
+reverse = foldRight (\t l -> t :. l) Nil
 
 -- | Produce an infinite `List` that seeds with the given value at its head,
 -- then runs the given function for subsequent elements
@@ -306,7 +306,7 @@ reverse =
 --
 -- >>> let (x:.y:.z:.w:._) = produce (*2) 1 in [x,y,z,w]
 -- [1,2,4,8]
-produce ::
+produce :: (Num a) =>
   (a -> a)
   -> a
   -> List a
