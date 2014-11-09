@@ -275,12 +275,8 @@ find f = let listToOpt Nil = Empty
 lengthGT4 ::
   List a
   -> Bool
-lengthGT4 Nil = False
-lengthGT4 (_ :. Nil) = False
-lengthGT4 (_ :. _ :. Nil) = False
-lengthGT4 (_ :. _ :. _ :. Nil) = False
-lengthGT4 (_ :. _ :. _ :. _ :. Nil) = False  -- TODO
-lengthGT4 (_ :. _ :. _ :. _ :. _) = True
+lengthGT4 (_ :. _ :. _ :. _ :. _ :. _) = True
+lengthGT4 _ = False
 
 -- | Reverse a list.
 --
