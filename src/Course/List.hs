@@ -311,8 +311,7 @@ produce :: (Num a) =>
   (a -> a)
   -> a
   -> List a
-produce =
-  error "todo"
+produce f s = s :. produce f (f s)
 
 -- | Do anything other than reverse a list.
 -- Is it even possible?
@@ -326,8 +325,7 @@ produce =
 notReverse ::
   List a
   -> List a
-notReverse =
-  error "todo"
+notReverse = reverse
 
 largeList ::
   List Int
