@@ -295,8 +295,13 @@ lengthGT4 (_ :. _ :. _ :. _ :. _) = True
 -- prop> let types = x :: Int in reverse (x :. Nil) == x :. Nil
 reverse ::
   List a
-  -> List a  -- TODO
-reverse = foldRight (\t l -> t :. l) Nil
+  -> List a
+-- filp :: (a -> b -> c) -> b -> a -> c
+-- reverse = foldLeft (flip (:.)) Nil
+reverse l =  rev l Nil
+  where
+    rev Nil     a = a
+    rev (x :. xs) a = rev xs (x :. a)
 
 -- | Produce an infinite `List` that seeds with the given value at its head,
 -- then runs the given function for subsequent elements
