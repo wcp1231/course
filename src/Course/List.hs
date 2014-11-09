@@ -229,10 +229,13 @@ flattenAgain =flatMap (\l -> l)
 seqOptional :: Eq a =>
   List (Optional a)
   -> Optional (List a)
-seqOptional l
-  | any (\i -> i == Empty) l = Empty
-  | otherwise = Full $ map fromFull l
-  where fromFull (Full a) = a
+seqOptional = foldRight (twiceOptional (:.)) (Full Nil)
+-- twiceOptional f = applyOptional . mapOptional f
+-- mapOptional :: (a -> (b -> c)) -> Optional a -> Optional (b -> c)
+              -- Optional (b -> c) 可能是
+              -- Full (:. a)
+              -- Empty
+
 
 -- | Find the first element in the list matching the predicate.
 --
